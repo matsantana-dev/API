@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<!-- começou as 22:15 -->
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit this template
+-->
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Mostrar País</title>
+        <link href="css/style.css" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+        <script>
+            function itensPais(){
+                const nomePais = document.getElementById('idNome').value.trim();
+
+                if (nomePais === "" || !nomePais) {
+                    alert("Por favor, insira o nome do país.");
+                    return;
+                }
+
+                document.getElementById("loading").style.display = "block";
+                document.getElementById("idErro").innerHTML = "";
+                document.getElementById("idNomePais").innerHTML = "";
+                document.getElementById("idOficial").innerHTML = "";
+                document.getElementById("idImg").src = "";
+                document.getElementById("idLink").innerHTML = "";
+                document.getElementById("idbtn").style.display = "none";
+                
+                fetch('https://restcountries.com/v3.1/name/' + nomePais, {
+                    method: 'GET',
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById("loading").style.display = "none";
+                        
+                        if (data !== null && data.status === undefined){
+                            const nomeNativoObj = data[0].name.nativeName;
+                            const aux = Object.keys(nomeNativoObj)[0];
+                            const nomeNativo = nomeNativoObj[aux].common;
+
+                            document.getElementById("idNomePais").innerHTML = 'Nome: ' + nomeNativo;
+                            document.getElementById("idImg").src =  data[0].flags.png;
+                            document.getElementById("idLink").innerHTML = data[0].maps.googleMaps;
+                            document.getElementById("idbtn").href = data[0].maps.googleMaps;
+                            document.getElementById("idbtn").style.display = "inline-block";
+                            document.getElementById("idOficial").innerHTML = 'Nome oficial em Português: ' + data[0].translations.por.official;
+                        } else {
+                            document.getElementById("idErro").innerHTML = "País não encontrado." + "<br>"
+                            +"Insira outro nome ou verifique se o nome do país está em inglês.";
+                        }
+                    })
+                    .catch(erro => {
+                        document.getElementById("loading").style.display = "none";
+                        document.getElementById("idErro").innerHTML = "Erro ao listar:"+ erro;
+                        console.log('')
+                        console.log('==========================================================')
+                        console.log('')
+                        console.log(' >> ❌ Erro na resposta da API: ' + erro + ' ❌ << ');
+                        console.log('')
+                        console.log('==========================================================')
+                        console.log('')
+                    });
+                }
+
+                const paisesSugestao = [
+                    { pt: "Brasil", en: "Brazil" },
+                    { pt: "Portugal", en: "Portugal" },
+                    { pt: "Estados Unidos", en: "United States" },
+                    { pt: "Alemanha", en: "Germany" },
+                    { pt: "França", en: "France" },
+                    { pt: "Itália", en: "Italy" },
+                    { pt: "Japão", en: "Japan" },
+                    { pt: "Canadá", en: "Canada" },
+                    { pt: "Argentina", en: "Argentina" },
+                    { pt: "Austrália", en: "Australia" }
+                ];
+
+                function abrirModal() {
+                    const modal = document.getElementById("modalSugestoes");
+                    const lista = document.getElementById("listaPaises");
+                    lista.innerHTML = ""; // limpa lista
+
+                    paisesSugestao.forEach((pais) => {
+                        const li = document.createElement("li");
+                        li.innerHTML = `<span class="nome-pt">${pais.pt}</span><span class="nome-en">(${pais.en})</span>`;
+                        li.onclick = () => {
+                        document.getElementById("idNome").value = pais.en;
+                        fecharModal();
+                        itensPais(); // chama a função que mostra a bandeira e dados
+                        };
+                        lista.appendChild(li);
+                    });
+
+                    modal.style.display = "block";
+                }
+
+                function fecharModal() {
+                    document.getElementById("modalSugestoes").style.display = "none";
+                }
+
+                window.onclick = function(event) {
+                const modal = document.getElementById("modalSugestoes");
+                if (event.target === modal) {
+                    fecharModal();
+                }
+                };
+        </script>
+    </head>
+    <body>
+       <div class="container">
+        <h1>Consultar Bandeira de um País</h1>
+        <input type="text" id="idNome" placeholder="Digite o nome do país (em inglês)"/>
+        <button onclick="itensPais()">
+            Mostrar País
+        </button>
+        <button onclick="abrirModal()" style="margin-left: 10px;">
+            Sugestões de Países
+        </button>
+
+        <div id="loading" class="loading">Carregando...</div>
+        <div id="idErro" class="erro"></div>
+
+        <!-- Modal -->
+        <div id="modalSugestoes" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="fecharModal()">&times;</span>
+                <div class="modal-header">Sugestões de Países</div>
+                <ul id="listaPaises" class="lista-paises"></ul>
+            </div>
+        </div>
+
+        <div class="resultado">
+            <p id="idNomePais" class="nome-pais"></p>
+            <p id="idOficial" class="traducao"></p>
+            <img id="idImg" alt="" class="bandeira" />
+            <p><strong>Google Maps:</strong></p>
+            <a id="idbtn" target="_blank" class="map-link" style="display: none"><strong>Veja no Maps</strong></a>
+            <p id="idLink" class="link-text"></p>
+        </div>
+        </div>
+    </body>
+</html>

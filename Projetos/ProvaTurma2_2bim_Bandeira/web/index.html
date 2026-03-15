@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<!-- começou as 22:15 -->
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit this template
+-->
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Mostrar País</title>
+        <link href="css/style.css" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+        <script>
+            function itensPais(){
+                const nomePais = document.getElementById('idNome').value.trim();
+                document.getElementById("loading").style.display = "block";
+                
+                fetch('https://restcountries.com/v3.1/name/' + nomePais, {
+                    method: 'GET',
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById("loading").style.display = "none";
+                        
+                        if (data !== null && data.status === undefined){
+                            document.getElementById("idImg").src =  data[0].flags.png;
+                            document.getElementById("idLink").innerHTML = data[0].maps.googleMaps;
+                            document.getElementById("idbtn").href = data[0].maps.googleMaps;
+                            document.getElementById("idbtn").style.display = "inline-block";
+                            document.getElementById("idTeste").innerHTML = 'Nome oficial em Português: ' + data[0].translations.por.official;
+                        } else {
+                            document.getElementById("idErro").innerHTML = "País não encontrado." + "<br>"
+                            +"Insira outro nome ou verifique se o nome do país está em inglês.";
+                        }
+                    })
+                    .catch(erro => {
+                        document.getElementById("loading").style.display = "none";
+                        document.getElementById("idErro").innerHTML = "Erro ao listar:"+ erro;
+                    });
+                }
+        </script>
+    </head>
+    <body>
+       <div class="container">
+        <h1>Consultar Bandeira de um País</h1>
+        <input type="text" id="idNome" placeholder="Digite o nome do país (em inglês)">
+        <button onclick="itensPais()">Mostrar Bandeira</button>
+
+        <div id="loading" class="loading">Carregando...</div>
+        <div id="idErro" class="erro"></div>
+
+        <div class="resultado">
+            <img id="idImg" alt="" class="bandeira">
+            <p><strong>Google Maps:</strong></p>
+            <a id="idbtn" target="_blank" class="map-link" style="display: none;"><strong>Veja no Maps</strong></a>
+            <p id="idLink" class="link-text"></p>
+            <p id="idTeste" class="traducao"></p>
+        </div>
+    </div>
+    </body>
+</html>
